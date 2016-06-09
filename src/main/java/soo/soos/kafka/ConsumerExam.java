@@ -5,7 +5,10 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import kafka.consumer.Consumer;
+
+import org.apache.kafka.clients.consumer.Consumer;
+
+//import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
 import kafka.consumer.KafkaStream;
 import kafka.javaapi.consumer.ConsumerConnector;
@@ -16,26 +19,37 @@ public class ConsumerExam {
     public static void main(String[] args) throws Exception {
         Properties props = new Properties();
         props.put("group.id", "test-group");
-        props.put("zookeeper.connect", "kafka-test-001.epicdevs.com:2181");
+        props.put("zookeeper.connect", "localhost:2181");
         props.put("auto.commit.interval.ms", "1000");
         ConsumerConfig consumerConfig = new ConsumerConfig(props);
-        ConsumerConnector consumer = Consumer.createJavaConsumerConnector(consumerConfig);
+//        ConsumerConnector consumer = Consumer.createJavaConsumerConnector(consumerConfig);
+        ConsumerConnector consumer = kafka.consumer.Consumer.createJavaConsumerConnector(consumerConfig);
         Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
         topicCountMap.put(TOPIC, NUM_THREADS);
-        Map<String, List<KafkaStream<byte[], byte[]>>> consumerMap = consumer.createMessageStreams(topicCountMap);
-        List<KafkaStream<byte[], byte[]>> streams = consumerMap.get(TOPIC);
-        ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
-        for (final KafkaStream<byte[], byte[]> stream : streams) {
-            executor.execute(new Runnable() {
-                public void run() {
-                    for (MessageAndMetadata<byte[], byte[]> messageAndMetadata : stream) {
-                        System.out.println(new String(messageAndMetadata.message()));
+        try {
+        	Map<String, List<KafkaStream<byte[], byte[]>>> consumerMap = consumer.createMessageStreams(topicCountMap);
+
+            List<KafkaStream<byte[], byte[]>> streams = consumerMap.get(TOPIC);
+            ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
+            for (final KafkaStream<byte[], byte[]> stream : streams) {
+                executor.execute(new Runnable() {
+                    public void run() {
+                        for (MessageAndMetadata<byte[], byte[]> messageAndMetadata : stream) {
+                            System.out.println(new String(messageAndMetadata.message()));
+                        }
                     }
-                }
-            });
-        } 
-        Thread.sleep(60000);
-        consumer.shutdown();
-        executor.shutdown();
+                });
+            } 
+            Thread.sleep(60000);
+            consumer.shutdown();
+            executor.shutdown();
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+        
+        
+        
+        
     }
 }
