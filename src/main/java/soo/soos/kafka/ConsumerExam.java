@@ -16,7 +16,7 @@ public class ConsumerExam {
     public static void main(String[] args) throws Exception {
         Properties props = new Properties();
         props.put("group.id", "test-group");
-        props.put("zookeeper.connect", "kafka-test-001.epicdevs.com:2181,kafka-test-002.epicdevs.com:2181,kafka-test-003.epicdevs.com:2181");
+        props.put("zookeeper.connect", "kafka-test-001.epicdevs.com:2181");
         props.put("auto.commit.interval.ms", "1000");
         ConsumerConfig consumerConfig = new ConsumerConfig(props);
         ConsumerConnector consumer = Consumer.createJavaConsumerConnector(consumerConfig);
